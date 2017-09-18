@@ -1658,6 +1658,36 @@ func TestStmtMultiRows(t *testing.T) {
 	})
 }
 
+func TestRowsColumnTypeScanType(t *testing.T) {
+	runTests(t, dsn, func(dbt *DBTest) {
+		rows, err := dbt.db.Query("SELECT 1")
+		if err != nil {
+			dbt.Fatal(err)
+		}
+
+		err = rows.Close()
+		if err != nil {
+			dbt.Fatal(err)
+		}
+
+		if rows.Next() {
+			dbt.Fatal("unexpected row after rows.Close()")
+		}
+		ColumnTypes, err := rows.ColumnTypes()
+		if err != nil {
+			dbt.Fatal(err)
+		}
+		for _, ctype := range ColumnTypes {
+			ctype.ScanType()
+		}
+
+		err = rows.Err()
+		if err != nil {
+			dbt.Fatal(err)
+		}
+	})
+}
+
 // Regression test for
 // * more than 32 NULL parameters (issue 209)
 // * more parameters than fit into the buffer (issue 201)
